@@ -1,0 +1,31 @@
+{
+	"name": "intellex/naming-convention",
+	"version": "1.0.0",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Ivan Sabo",
+			"email": "sabo@intellex.rs"
+		}
+	],
+	"scripts": {
+		"test": "phpunit --coverage-html tests/coverage --coverage-filter src/ --colors=always tests"
+	},
+	"autoload": {
+		"psr-4": {
+			"Intellex\\NamingConvention\\": "src\\"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Intellex\\NamingConvention\\Tests\\": "tests\\"
+		}
+
+	},
+	"require": {
+		"php": ">=8.1"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^10"
+	}
+}

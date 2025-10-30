@@ -1,0 +1,66 @@
+#!/usr/bin/env sh
+# ╔══════════════════════════════════════════════════════════════════════════╗ #
+# ║                                                                          ║ #
+# ║ Run a command in the dedicated docker image                              ║ #
+# ║                                                                          ║ #
+# ╟──────────────────────────────────────────────────────────────────────────╢ #
+# ║                                                                          ║ #
+# ║ Usage:                                                                   ║ #
+# ║   .run/in-docker <command>                                               ║ #
+# ║                                                                          ║ #
+# ╟──────────────────────────────────────────────────────────────────────────╢ #
+# ║                                                                          ║ #
+# ║ Examples:                                                                ║ #
+# ║   .run/in-docker pwd                                                     ║ #
+# ║   .run/in-docker php -info                                               ║ #
+# ║   .run/in-docker composer update                                         ║ #
+# ║   .run/in-docker composer run test                                       ║ #
+# ║                                                                          ║ #
+# ╚══════════════════════════════════════════════════════════════════════════╝ #
+# shellcheck disable=SC2086
+
+# Show an error and exit
+err() {
+    echo "\e[31mERROR:\e[0m $1"
+    exit 1
+}
+
+# Assert: Docker is available
+if ! command -v docker >/dev/null 2>&1; then
+    err "Docker not found"
+fi
+
+# Assert: Called from the root
+DOCKERFILE=".run/conf/Dockerfile"
+if [ ! -f "${DOCKERFILE}" ]; then
+    err "Must be run from the root"
+fi
+
+# Assert: Docker labels can be read
+DOCKER_NAME="$(grep -oP '(?<=name=").+(?=")' "${DOCKERFILE}")"
+DOCKER_VENDOR="$(grep -oP '(?<=vendor=").+(?=")' "${DOCKERFILE}")"
+DOCKER_VERSION="$(grep -oP '(?<=version=").+(?=")' "${DOCKERFILE}")"
+[ -z "${DOCKER_NAME}" ] && err "Unable to read docker image name"
+[ -z "${DOCKER_VENDOR}" ] && err "Unable to read docker image vendor"
+[ -z "${DOCKER_VERSION}" ] && err "Unable to read docker image version"
+
+# Assert: There is a command
+COMMAND="$*"
+if [ -z "${COMMAND}" ]; then
+    err "Please provide a command to execute"
+fi
+
+# Check if an image is ready
+DOCKER_IMAGE="$(echo "${DOCKER_VENDOR}/${DOCKER_NAME}:${DOCKER_VERSION}" | tr '[:upper:]' '[:lower:]')"
+if ! docker image inspect "${DOCKER_IMAGE}" >/dev/null 2>&1; then
+    docker build -f "${DOCKERFILE}" -t "${DOCKER_IMAGE}" .
+fi
+
+# Run on docker
+docker run --rm -it \
+    -v ".:/var/www/html" \
+    -v "./.run/conf/php-xdebug.ini:/usr/local/etc/php/conf.d/api-php.ini:ro" \
+    -e PHP_IDE_CONFIG="serverName=docker" \
+    --add-host host.docker.internal:host-gateway \
+    ${DOCKER_IMAGE} \
+    ${COMMAND}
