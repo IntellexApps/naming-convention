@@ -28,7 +28,7 @@ $varName->convention // NamingConvention::SNAKE_CASE
 
 # Convert
 $newName = $varName->convertTo(NamingConvention::PASCAL_CASE);
-$newName->name       // NamingConvention::SNAKE_CASE
+$newName->name       // "MyVarName"
 ```
 
 ## License
