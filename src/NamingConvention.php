@@ -74,13 +74,13 @@ enum NamingConvention: string {
 	}
 
 	/**
-	 * Infer the naming convention from an array, by checking each of the variable name.
+	 * Infer the naming convention from the list of variable names.
 	 *
-	 * @param array<string, mixed> $array The array to infer from.
+	 * @param string[] $names The list of variable names to infer the convention from.
 	 *
-	 * @return NamingConvention The naming convention that is applicable to all keys within the supplied array.
+	 * @return NamingConvention The naming convention that is applicable to all supplied keys.
 	 */
-	public static function inferFromArray(array $array): NamingConvention {
+	public static function inferFromList(array $names): NamingConvention {
 		$conventions = self::cases();
 
 		// Try every convention that is still not excluded
@@ -88,16 +88,16 @@ enum NamingConvention: string {
 			if (in_array($convention, $conventions)) {
 
 				// Remove from excluded
-				foreach ($array as $key => $value) {
+				foreach ($names as $name) {
 
 					// Must be a string
-					if (!is_string($key)) {
-						$type = gettype($key);
-						throw new UnableToDetermineUsedConvention("({$type}) {$key}");
+					if (!is_string($name)) {
+						$type = gettype($name);
+						throw new UnableToDetermineUsedConvention("({$type}) {$name}");
 					}
 
 					// Validate the convention
-					if (!$convention->validate($key)) {
+					if (!$convention->validate($name)) {
 						$conventions = array_filter($conventions, static fn($c) => $c !== $convention);
 					}
 				}
@@ -105,12 +105,23 @@ enum NamingConvention: string {
 
 			// Drop if none found
 			if (count($conventions) === 0) {
-				$keys = implode(', ', array_keys($array));
+				$keys = implode(', ', $names);
 				throw new UnableToDetermineUsedConvention("(array) {$keys}");
 			}
 		}
 
 		// Return the first applicable
 		return reset($conventions);
+	}
+
+	/**
+	 * Infer the naming convention from the data, by checking each of the property within.
+	 *
+	 * @param array<string, mixed> $data The data to infer from.
+	 *
+	 * @return NamingConvention The naming convention that is applicable to all keys within the supplied array.
+	 */
+	public static function inferFromData(array $data): NamingConvention {
+		 return self::inferFromList(array_keys($data));
 	}
 }

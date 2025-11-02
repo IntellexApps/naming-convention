@@ -6,7 +6,7 @@ use Intellex\NamingConvention\Exceptions\UnableToDetermineUsedConvention;
 use Intellex\NamingConvention\NamingConvention;
 use PHPUnit\Framework\TestCase;
 
-class InferFromArrayTest extends TestCase {
+class InferFromDataTest extends TestCase {
 
 	/** @return array<array, NamingConvention> The list of valid conventions names and expected values. */
 	public static function validArrayProvider(): array {
@@ -56,7 +56,7 @@ class InferFromArrayTest extends TestCase {
 
 	/** @dataProvider validArrayProvider */
 	public function testInferFromValidArray(NamingConvention $expectedConvention, array $inputArray): void {
-		$actualConvention = NamingConvention::inferFromArray($inputArray);
+		$actualConvention = NamingConvention::inferFromData($inputArray);
 		$this->assertEquals(
 			$expectedConvention,
 			$actualConvention,
@@ -89,7 +89,8 @@ class InferFromArrayTest extends TestCase {
 				"key" => "value",
 			] ],
 			[ [
-				"camelCase"  => "camel",
+				"camel"      => "camel",
+				"camelCase"  => "case",
 				"snake_case" => "snake",
 			] ],
 			[ [
@@ -110,6 +111,6 @@ class InferFromArrayTest extends TestCase {
 	/** @dataProvider invalidArrayProvider */
 	public function testInferFromInvalidArray(mixed $invalidInputArray): void {
 		$this->expectException(UnableToDetermineUsedConvention::class);
-		NamingConvention::inferFromArray($invalidInputArray);
+		NamingConvention::inferFromData($invalidInputArray);
 	}
 }

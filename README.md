@@ -12,8 +12,7 @@ Small library to detect and convert between naming conventions.
 
 ## Usage
 
-`composer require intellex/naming-convention`
-
+Via composer: `composer require intellex/naming-convention`
 
 ```php
 use Intellex\NamingConvention\NamingConvention
@@ -30,6 +29,11 @@ $varName->convention // NamingConvention::SNAKE_CASE
 $newName = $varName->convertTo(NamingConvention::PASCAL_CASE);
 $newName->name       // "MyVarName"
 ```
+
+## Related projects
+
+This library is developed for the automated
+[data parsing library](https://github.com/IntellexApps/data-parser).
 
 ## License
 
